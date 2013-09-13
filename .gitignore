@@ -1,0 +1,10 @@
+*~
+#*#
+._*
+wifi_survey.log
+bin/
+*.class
+gen/
+.classpath
+.settings/
+.project
