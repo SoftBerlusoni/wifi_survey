@@ -8,16 +8,17 @@ import java.util.Set;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import fishjord.wifisurvey.tasks.PostDataTask;
 
 public class WifiServiceReciever extends BroadcastReceiver {
 
-	private String postUrl;
 	private Criteria locCriteria;
 
 	public WifiServiceReciever() {
@@ -27,8 +28,6 @@ public class WifiServiceReciever extends BroadcastReceiver {
 		locCriteria.setBearingRequired(false);
 		locCriteria.setCostAllowed(false);
 		locCriteria.setPowerRequirement(Criteria.POWER_LOW);
-
-		this.postUrl = "https://www.cse.msu.edu/~fishjord/cse824/wifi_survey.php";
 	}
 
 	@Override
@@ -38,8 +37,11 @@ public class WifiServiceReciever extends BroadcastReceiver {
 		LocationManager locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.getBestProvider(locCriteria, true);		
+		
+		SharedPreferences prefs = context.getApplicationContext().getSharedPreferences(context.getString(R.string.pref_bundle_name), 0);
 
-		PostDataTask task = new PostDataTask(postUrl);
+		Log.i(this.getClass().getCanonicalName(), "Posting to " + context.getString(R.string.server_url) + "/wifi_survey.php");
+		PostDataTask task = new PostDataTask(prefs.getString(context.getString(R.string.server_url) + "/wifi_survey.php", ""));
 		List<ScanResult> scanResults = wifiManager.getScanResults();
 		List<Location> locations = new ArrayList();
 		Set<String> providers = new HashSet();

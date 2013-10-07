@@ -1,5 +1,9 @@
-package fishjord.wifisurvey;
+package fishjord.wifisurvey.activities;
 
+import fishjord.wifisurvey.R;
+import fishjord.wifisurvey.R.id;
+import fishjord.wifisurvey.R.layout;
+import fishjord.wifisurvey.R.menu;
 import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.WifiManager;
