@@ -1,18 +1,21 @@
 package fishjord.wifisurvey.activities;
 
-import fishjord.wifisurvey.R;
-import fishjord.wifisurvey.R.id;
-import fishjord.wifisurvey.R.layout;
-import fishjord.wifisurvey.R.menu;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import fishjord.wifisurvey.R;
+import fishjord.wifisurvey.WifiServiceReciever;
 
 public class MainActivity extends Activity {
+	
+	private final WifiServiceReciever receiver = new WifiServiceReciever();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +33,30 @@ public class MainActivity extends Activity {
 				wifiManager.startScan();
 			}
 		});
+		
+		Button settings = (Button) findViewById(R.id.settings);
+		settings.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				v.getContext().startActivity(new Intent("fishjord.wifisurvey.PREFS"));
+			}
+		});
+		
+		this.registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		
 	}
+	
+	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		this.unregisterReceiver(receiver);
+	}
+
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

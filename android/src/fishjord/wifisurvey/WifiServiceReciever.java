@@ -22,6 +22,7 @@ public class WifiServiceReciever extends BroadcastReceiver {
 	private Criteria locCriteria;
 
 	public WifiServiceReciever() {
+		Log.i(this.getClass().getCanonicalName(), "Created wifi service reciever");
 		locCriteria = new Criteria();
 		locCriteria.setAccuracy(Criteria.ACCURACY_FINE);
 		locCriteria.setAltitudeRequired(true);

@@ -21,20 +21,17 @@
         <activity
             android:name="fishjord.wifisurvey.activities.MainActivity"
             android:label="@string/app_name" >
-        </activity>
-        <receiver android:name="WifiServiceReciever">
-            <intent-filter>
-            	<action android:name="android.net.wifi.SCAN_RESULTS" />
-            	<category android:name="android.intent.category.DEFAULT" />
-        </intent-filter>
-        </receiver>
-        <activity android:name="SettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
+        </activity>
+        <activity android:name=".activities.SettingsActivity">
+            <intent-filter>
+                <action android:name="fishjord.wifisurvey.PREFS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>           
             </activity>
     </application>
 
