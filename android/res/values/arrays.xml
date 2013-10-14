@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="survey_mode">
+        <item>0</item> <!-- Off -->
+        <item>1</item> <!-- Passive -->
+        <item>2</item> <!-- Active -->
+        <item>3</item> <!-- Training -->
+    </string-array>
+    <string-array name="survey_mode_labels">
+        <item>Off</item>
+        <item>Passive Only</item>
+        <item>Active</item>
+        <item>Training</item>
+    </string-array>
+    
+    <string-array name="survey_delay">
+        <item>1000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>300000</item>
+        <item>600000</item>
+        <item>1800000</item>
+    </string-array>
+    <string-array name="survey_delay_labels">
+        <item>1 Second</item>
+        <item>10 Second</item>
+        <item>30 Second</item>
+        <item>1 Minute</item>
+        <item>5 Minutes</item>
+        <item>10 Minutes</item>
+        <item>30 Minutes</item>
+    </string-array>
+</resources>

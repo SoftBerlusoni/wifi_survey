@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <ListPreference android:title="Survey Mode" android:entryValues="@array/survey_mode" android:key="@string/survey_mode" android:entries="@array/survey_mode_labels" android:summary="Set the survey mode" android:persistent="true" android:defaultValue="passive_mode"/>
-    <EditTextPreference android:summary="WiFi Survey Server Location" android:key="@string/server_url" android:defaultValue="http://cse.msu.edu/~fishjord/cse824/" android:persistent="true" android:title="Server URL"/>
+    <ListPreference android:title="Survey Mode" android:entryValues="@array/survey_mode" android:key="mode" android:entries="@array/survey_mode_labels" android:summary="Set the survey mode" android:persistent="true" android:defaultValue="1"/>
+    <ListPreference android:title="Survey Delay" android:entryValues="@array/survey_delay" android:key="delay" android:entries="@array/survey_delay_labels" android:summary="Set the maximum cache time for survey data" android:persistent="true" android:defaultValue="10000"/>
+    <EditTextPreference android:summary="WiFi Survey Server Location" android:key="base_url" android:defaultValue="http://cse.msu.edu/~fishjord/cse824/" android:persistent="true" android:title="Server URL"/>
     
 
 </PreferenceScreen>

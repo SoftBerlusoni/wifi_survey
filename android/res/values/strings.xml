@@ -3,16 +3,6 @@
 
     <string name="app_name">WifiSurvey</string>
     <string name="action_settings">Settings</string>
-    <string-array name="survey_mode">
-        <item >passive_mode</item>http://cse.msu.edu/~fishjord/cse824/http://cse.msu.edu/~fishjord/cse824/http://cse.msu.edu/~fishjord/cse824/version
-        <item >active_mode</item>
-        <item >training_mode</item>
-    </string-array>
-    <string-array name="survey_mode_labels">
-        <item >Passive Only</item>
-        <item >Active</item>
-        <item >Training</item>
-    </string-array>
     <string name="survey_mode">survey_mode</string>
     <string name="server_url">server_url</string>
     <string name="pref_bundle_name">wifi_survey_preferences</string>

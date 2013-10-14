@@ -8,21 +8,45 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/scan"
+    <ImageButton
+        android:id="@+id/pref_button"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="Push Me!" />
+        android:layout_alignTop="@+id/upload_button"
+        android:onClick="showPreferences"
+        android:src="@android:drawable/ic_menu_preferences" />
 
-    <Button
-        android:id="@+id/settings"
+    <ImageButton
+        android:id="@+id/refresh_button"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/scan"
-        android:layout_below="@+id/scan"
-        android:layout_marginTop="14dp"
-        android:text="Settings" />
+        android:layout_alignTop="@+id/upload_button"
+        android:layout_centerHorizontal="true"
+        android:onClick="refreshReadings"
+        android:src="@drawable/ic_menu_refresh" />
+
+    <ImageButton
+        android:id="@+id/upload_button"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="uploadData"
+        android:src="@android:drawable/ic_menu_upload" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pref_button"
+        android:layout_alignLeft="@+id/upload_button"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/pref_button"
+		android:scrollbars = "vertical"
+        android:text="" />
 
 </RelativeLayout>

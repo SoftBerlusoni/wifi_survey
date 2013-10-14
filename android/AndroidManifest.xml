@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="17"
         android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -27,12 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.SettingsActivity">
-            <intent-filter>
-                <action android:name="fishjord.wifisurvey.PREFS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>           
-            </activity>
+        <activity
+            android:name="fishjord.wifisurvey.activities.PreferencesActivity" />
     </application>
 
 </manifest>
