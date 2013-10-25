@@ -59,8 +59,15 @@ public class ConnectedAPCollector extends DataCollector {
 
 		@Override
 		public JSONObject toJSONObject() throws JSONException {
-			// TODO Auto-generated method stub
-			return null;
+			JSONObject ret = new JSONObject();
+			
+			ret.put("ssid", info.getSSID());
+			ret.put("bssid", info.getBSSID());
+			ret.put("rssi", info.getRssi());
+			ret.put("hidden_ssid", info.getHiddenSSID());
+			ret.put("link_speed", info.getLinkSpeed());
+			
+			return ret;
 		}
 		
 	}

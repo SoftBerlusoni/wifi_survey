@@ -6,5 +6,7 @@
     <string name="survey_mode">survey_mode</string>
     <string name="server_url">server_url</string>
     <string name="pref_bundle_name">wifi_survey_preferences</string>
+    <string name="title_activity_training">TrainingActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

@@ -1,11 +1,11 @@
 package fishjord.wifisurvey.datacollectors;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -124,7 +124,25 @@ public class WifiScanCollector extends DataCollector {
 		}
 
 		public JSONObject toJSONObject() throws JSONException {
-			return null;
+			JSONArray aps = new JSONArray();
+			
+			for(ScanResult result : scanResults) {
+				JSONObject ap = new JSONObject();
+
+				ap.put("ssid", result.SSID);
+				ap.put("bssid", result.BSSID);
+				ap.put("rssi", result.level);
+				ap.put("timestamp", result.timestamp);
+				ap.put("freq", result.frequency);
+				ap.put("capabilities", result.capabilities);
+				
+				aps.put(ap);
+			}
+
+			JSONObject ret = new JSONObject();
+			ret.put("access_points", aps);
+			
+			return ret;
 		}
 	}
 }

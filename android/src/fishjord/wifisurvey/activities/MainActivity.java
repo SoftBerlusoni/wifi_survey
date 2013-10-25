@@ -1,13 +1,5 @@
 package fishjord.wifisurvey.activities;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -32,19 +24,20 @@ import fishjord.wifisurvey.datacollectors.PingDataCollector;
 import fishjord.wifisurvey.datacollectors.WifiScanCollector;
 import fishjord.wifisurvey.datacollectors.WifiScanCollector.ScanManager;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
+import fishjord.wifisurvey.tasks.UploadTask;
 
 public class MainActivity extends Activity implements
 		OnSharedPreferenceChangeListener {
 
 	private WifiDataManager dataManager;
 	private WifiDataRecord lastRecord;
+	
+	public static final ScanManager scanLock = new ScanManager();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		ScanManager scanLock = new ScanManager();
 		
 		WifiManager wifiManager = (WifiManager) this.getApplicationContext()
 				.getSystemService(Context.WIFI_SERVICE);
@@ -58,7 +51,7 @@ public class MainActivity extends Activity implements
 		dataManager = new WifiDataManager(
 				new WifiScanCollector(wifiManager, scanLock),
 				new ConnectedAPCollector(wifiManager),
-				new PingDataCollector(wifiManager, 10)
+				new PingDataCollector(wifiManager, 100)
 				);
 	}
 
@@ -93,6 +86,7 @@ public class MainActivity extends Activity implements
 				}
 				
 				textView.setText(builder.toString());
+				MainActivity.this.lastRecord = result;
 			}
 		};
 
@@ -100,55 +94,29 @@ public class MainActivity extends Activity implements
 	}
 
 	public void uploadData(View view) {
+		if(lastRecord == null) {
+			return;
+		}
 		Log.d(this.getClass().getCanonicalName(), "Starting upload");
 		final WifiDataManager finalDataManager = dataManager;
 		final SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		Log.d(this.getClass().getCanonicalName(), "URL: " + prefs.getString(
-				getString(R.string.server_url), ""));
-		Log.d(this.getClass().getCanonicalName(), "URL: " + getString(R.string.server_url));
 		
-		AsyncTask<Void, Void, WifiDataRecord> task = new AsyncTask<Void, Void, WifiDataRecord>() {
-
-			@Override
-			protected WifiDataRecord doInBackground(Void... arg0) {
-				WifiDataRecord record = null;
-
-				try {
-					DefaultHttpClient httpClient = new DefaultHttpClient();
-					HttpPut putReq = new HttpPut(prefs.getString(
-							getString(R.string.server_url), ""));
-					StringEntity entity = new StringEntity(record.toString());
-					entity.setContentType("text/plain;charset=UTF-8");
-					entity.setContentEncoding(new BasicHeader(
-							HTTP.CONTENT_TYPE, "text/plain;charset=UTF-8"));
-					putReq.setEntity(entity);
-
-					Log.d(this.getClass().getCanonicalName(), "Sending request");
-					HttpResponse response = httpClient.execute(putReq);
-					Log.d(this.getClass().getCanonicalName(), "Status line: "
-							+ response.getStatusLine());
-					Log.d(this.getClass().getCanonicalName(),
-							EntityUtils.toString(response.getEntity()));
-				} catch (Exception e) {
-					Log.e(this.getClass().getCanonicalName(), e.toString());
-				}
-				return record;
-			}
-
-			protected void onPostExecute(WifiDataRecord result) {
-				Log.i(this.getClass().getCanonicalName(), result.toString());
-				TextView textView = (TextView) findViewById(R.id.textView1);
-				textView.setText(result.toString());
-			}
-		};
+		UploadTask task = new UploadTask(prefs.getString(
+							"base_url", "") + "/upload.php");
 		
-		task.execute();
+		task.execute(lastRecord);
 	}
 
 	public void showPreferences(View view) {
 		Intent intent = new Intent();
 		intent.setClass(this, PreferencesActivity.class);
+		startActivityForResult(intent, 0);
+	}
+
+	public void showTrainingActivity(View view) {
+		Intent intent = new Intent();
+		intent.setClass(this, TrainingActivity.class);
 		startActivityForResult(intent, 0);
 	}
 

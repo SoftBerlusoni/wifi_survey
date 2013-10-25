@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -146,8 +147,21 @@ public class PingDataCollector extends DataCollector {
 
 		@Override
 		public JSONObject toJSONObject() throws JSONException {
-			// TODO Auto-generated method stub
-			return null;
+			JSONObject ret = new JSONObject();
+			ret.put("sent", packetsSent);
+
+			JSONArray jsonResponses = new JSONArray();
+			for(PingResponse response : responses) {
+				JSONObject pingResponse = new JSONObject();
+				pingResponse.put("icmp_seq", response.getIcmpSeq());
+				pingResponse.put("rtt", response.getTimeMs());
+				pingResponse.put("ttl", response.getTtl());
+				jsonResponses.put(pingResponse);
+			}
+			
+			ret.put("responses", jsonResponses);
+			
+			return ret;
 		}
 		
 		public String getDataLabel() {
