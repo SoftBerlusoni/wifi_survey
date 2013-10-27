@@ -2,8 +2,10 @@ package fishjord.wifisurvey.activities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,8 +30,8 @@ import fishjord.wifisurvey.tasks.TrainingUploadTask;
 
 public class TrainingActivity extends Activity {
 
-	private static final int NUM_TRAINING = 5;
 	private WifiDataManager dataManager;
+	private final UUID trainingId = UUID.randomUUID();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,8 @@ public class TrainingActivity extends Activity {
 
 		dataManager = new WifiDataManager(new WifiScanCollector(wifiManager,
 				MainActivity.scanLock));
-		PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.wifi_survey_preferences, false);
+		PreferenceManager.setDefaultValues(this.getApplicationContext(),
+				R.xml.wifi_survey_preferences, false);
 
 		EditText locNumber = (EditText) this.findViewById(R.id.location_number);
 		locNumber.setText("1");
@@ -64,32 +67,37 @@ public class TrainingActivity extends Activity {
 		final WifiDataManager finalDataManager = dataManager;
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(view.getContext());
+		final int NUM_TRAINING = Integer.valueOf(prefs.getString(
+				"training_count", ""));
 
 		final EditText locNumber = (EditText) this
 				.findViewById(R.id.location_number);
-		final ProgressBar progress = (ProgressBar)findViewById(R.id.sampling_progress);
+		final ProgressBar progress = (ProgressBar) findViewById(R.id.sampling_progress);
 		progress.setMax(NUM_TRAINING);
 		progress.setProgress(0);
 
 		final int location = Integer.valueOf(locNumber.getText().toString());
 		Log.d(this.getClass().getCanonicalName(),
-				"Starting taking training readings for location " + location + " and sending to " + prefs.getString(
-						getString(R.string.server_url), ""));
-		final TrainingUploadTask uploadTask = new TrainingUploadTask(prefs.getString(
-							"base_url", "") + "/upload_training.php", location);
-
+				"Starting taking training readings for location " + location
+						+ " and sending to " + prefs.getString("base_url", ""));
+		final TrainingUploadTask uploadTask = new TrainingUploadTask(prefs.getString("base_url", "")
+						+ "/upload_training.php", location, trainingId);
 
 		AsyncTask<Void, Void, List<WifiDataRecord>> task = new AsyncTask<Void, Void, List<WifiDataRecord>>() {
+			
+			private boolean sendOk;
 
 			@Override
 			protected List<WifiDataRecord> doInBackground(Void... arg0) {
 				List<WifiDataRecord> ret = new ArrayList<WifiDataRecord>();
 				for (int index = 0; index < NUM_TRAINING; index++) {
-					Log.d(this.getClass().getCanonicalName(), "Training sample " + index);
+					Log.d(this.getClass().getCanonicalName(),
+							"Training sample " + index);
 					progress.setProgress(index + 1);
-					//dialog.setMessage("Training sample " + (index + 1));
+					// dialog.setMessage("Training sample " + (index + 1));
 					ret.add(dataManager.refreshData(ScanLevel.TRAINING, 0));
 				}
+				sendOk = uploadTask.go(ret.toArray(new WifiDataRecord[ret.size()]));
 				return ret;
 			}
 
@@ -110,9 +118,10 @@ public class TrainingActivity extends Activity {
 					}
 				}
 
-				textView.setText(builder.toString());
-				locNumber.setText((location + 1) + "");
-				uploadTask.execute(results.toArray(new WifiDataRecord[results.size()]));
+				textView.setText(uploadTask.getErrorMessage() + "\n\n" + builder.toString());
+				if (sendOk) {
+					locNumber.setText((location + 1) + "");
+				}
 			}
 		};
 

@@ -8,56 +8,61 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <ImageButton
-        android:id="@+id/pref_button"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/upload_button"
-        android:onClick="showPreferences"
-        android:src="@android:drawable/ic_menu_preferences" />
-
-    <ImageButton
-        android:id="@+id/upload_button"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:onClick="uploadData"
-        android:src="@android:drawable/ic_menu_upload" />
-
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/pref_button"
-        android:layout_alignLeft="@+id/upload_button"
+        android:layout_above="@+id/linearLayout1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/pref_button"
-		android:scrollbars = "vertical"
+        android:scrollbars="vertical"
         android:text="" />
 
-    <ImageButton
-        android:id="@+id/training_button"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/pref_button"
-        android:layout_marginRight="14dp"
-        android:layout_toLeftOf="@+id/pref_button"
-        android:onClick="showTrainingActivity"
-        android:src="@drawable/ic_menu_refresh" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:gravity="center" >
 
-    <ImageButton
-        android:id="@+id/refresh_button"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
-        android:layout_toLeftOf="@+id/training_button"
-        android:onClick="refreshReadings"
-        android:src="@drawable/ic_menu_refresh" />
+        <ImageButton
+            android:id="@+id/pref_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="showPreferences"
+            android:src="@android:drawable/ic_menu_preferences" />
+
+        <ImageButton
+            android:id="@+id/training_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="showTrainingActivity"
+            android:src="@drawable/ic_menu_compass" />
+
+        <ImageButton
+            android:id="@+id/refresh_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="refreshReadings"
+            android:src="@drawable/ic_menu_refresh" />
+
+        <ImageButton
+            android:id="@+id/upload_button"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="uploadData"
+            android:src="@android:drawable/ic_menu_upload" />
+    </LinearLayout>
 
 </RelativeLayout>

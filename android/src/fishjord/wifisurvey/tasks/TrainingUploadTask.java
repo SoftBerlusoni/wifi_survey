@@ -1,6 +1,7 @@
 package fishjord.wifisurvey.tasks;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPut;
@@ -15,18 +16,20 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import fishjord.wifisurvey.R;
 import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
 
-public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
+public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Boolean> {
 
 	private final String url;
 	private final int location;
+	private String errorMessage;
+	private UUID trainingId;
 
-	public TrainingUploadTask(String targetUrl, int location) {
+	public TrainingUploadTask(String targetUrl, int location, UUID trainingId) {
 		this.url = targetUrl;
 		this.location = location;
+		this.trainingId = trainingId;
 	}
 
 	private JSONObject toJSON(WifiDataRecord... params) throws JSONException {
@@ -36,6 +39,7 @@ public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 		trainingData.put("type", "training_sample");
 		trainingData.put("location", location);
 		trainingData.put("time", new Date());
+		trainingData.put("training_session_id", trainingId);
 		
 		for(WifiDataRecord record : params) {
 			JSONObject entry = new JSONObject();
@@ -52,8 +56,12 @@ public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 		return trainingData;
 	}
 
+	public Boolean go(WifiDataRecord... params) {
+		return doInBackground(params);
+	}
+	
 	@Override
-	protected Void doInBackground(WifiDataRecord... params) {
+	protected Boolean doInBackground(WifiDataRecord... params) {
 		try {
 			JSONObject toSend = toJSON(params);
 			Log.d(this.getClass().getCanonicalName(), "sending " + toSend);
@@ -73,10 +81,23 @@ public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 			Log.d(this.getClass().getCanonicalName(),
 					EntityUtils.toString(response.getEntity()));
 			
+			if(response.getStatusLine().getStatusCode() != 200) {
+				throw new Exception(response.getStatusLine().toString());
+			}
+			
+			this.errorMessage = response.getStatusLine().toString();
+			
 		} catch(Exception e) {
-			Log.d(this.getClass().getCanonicalName(), "sending failed " + e.toString());			
+			Log.d(this.getClass().getCanonicalName(), "sending failed " + e.toString());
+			this.errorMessage = e.toString();
+			return false;
 		}
 
-		return null;
+		return true;
 	}
+	
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+	
 }

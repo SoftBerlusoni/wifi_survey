@@ -2,7 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <ListPreference android:title="Survey Mode" android:entryValues="@array/survey_mode" android:key="mode" android:entries="@array/survey_mode_labels" android:summary="Set the survey mode" android:persistent="true" android:defaultValue="1"/>
     <ListPreference android:title="Survey Delay" android:entryValues="@array/survey_delay" android:key="delay" android:entries="@array/survey_delay_labels" android:summary="Set the maximum cache time for survey data" android:persistent="true" android:defaultValue="10000"/>
+    <ListPreference android:title="Ping Count" android:entryValues="@array/ping_count" android:key="ping_count" android:entries="@array/ping_count" android:summary="Set the number of pings to send" android:persistent="true" android:defaultValue="10"/>
     <EditTextPreference android:summary="WiFi Survey Server Location" android:key="base_url" android:defaultValue="http://cse.msu.edu/~fishjord/cse824/" android:persistent="true" android:title="Server URL"/>
-    
-
+    <PreferenceCategory android:title="Training">
+        <ListPreference android:title="Training samples" android:entryValues="@array/training_count" android:key="training_count" android:entries="@array/training_count" android:summary="Set the number of training samples to take" android:persistent="true" android:defaultValue="20"/>
+    </PreferenceCategory>
 </PreferenceScreen>
