@@ -9,3 +9,6 @@ gen/
 .settings/
 .project
 ~*
+*.class
+build/
+private/
