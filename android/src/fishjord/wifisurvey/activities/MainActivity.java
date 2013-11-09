@@ -20,7 +20,7 @@ import fishjord.wifisurvey.ScanLevel;
 import fishjord.wifisurvey.WifiDataManager;
 import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.ConnectedAPCollector;
-import fishjord.wifisurvey.datacollectors.PingDataCollector;
+import fishjord.wifisurvey.datacollectors.LatencyDataCollector;
 import fishjord.wifisurvey.datacollectors.WifiScanCollector;
 import fishjord.wifisurvey.datacollectors.WifiScanCollector.ScanManager;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
@@ -51,7 +51,8 @@ public class MainActivity extends Activity implements
 		dataManager = new WifiDataManager(
 				new WifiScanCollector(wifiManager, scanLock),
 				new ConnectedAPCollector(wifiManager),
-				new PingDataCollector(wifiManager, 100)
+				//new PingDataCollector(wifiManager, 100)
+				new LatencyDataCollector(wifiManager, (short)100)
 				);
 	}
 
