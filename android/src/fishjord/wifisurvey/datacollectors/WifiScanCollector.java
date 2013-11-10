@@ -16,11 +16,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import fishjord.wifisurvey.ScanLevel;
 
-public class WifiScanCollector extends DataCollector {
-	private WifiSurveyData cachedData;
-	private final ScanManager scanLock;
-	
-	public static class ScanManager extends BroadcastReceiver{
+public class WifiScanCollector {	
+	public static class ScanLock extends BroadcastReceiver{
 		private boolean scanDone;
 		private Lock lock = new ReentrantLock();
 		private static final long scanTimeout = 30 * 1000; //30 seconds
@@ -63,25 +60,17 @@ public class WifiScanCollector extends DataCollector {
 				lock.unlock();
 			}
 		}
-		
 	}
 	
-	public WifiScanCollector(WifiManager wifiManager, ScanManager scanLock) {
-		super(wifiManager);
+	private WifiManager wifiManager;
+	private WifiSurveyData cachedData;
+	private final ScanLock scanLock;
+	
+	public WifiScanCollector(WifiManager wifiManager, ScanLock scanLock) {
+		this.wifiManager = wifiManager;
 		this.scanLock = scanLock;
 	}
-
-	@Override
-	public WifiSurveyData getLastUpdate() {
-		return cachedData;
-	}
-
-	@Override
-	public int getScanLevel() {
-		return ScanLevel.ACTIVE;
-	}
-
-	@Override
+	
 	public boolean doRefreshData() {
 		try {
 			scanLock.runSerialScan(this.wifiManager);
@@ -89,60 +78,11 @@ public class WifiScanCollector extends DataCollector {
 			return false;
 		}
 		
-		cachedData = new ScanSurveyData(null, wifiManager.getScanResults());
+		cachedData = new ScanSurveyData(wifiManager.getScanResults());
 		return true;
 	}
-
-	public static class ScanSurveyData extends WifiSurveyData {
-		private final List<ScanResult> scanResults;
-		
-		public ScanSurveyData(String ssid, List<ScanResult> scanResults) {
-			super(ssid);
-			this.scanResults = Collections.unmodifiableList(scanResults);
-		}
-		
-		public String getDataLabel() {
-			return "scan";
-		}
-		
-		@Override
-		public String toString() {
-			StringBuilder ret = new StringBuilder();
-			for(ScanResult result : scanResults) {
-				if(result.SSID.length() == 0) {
-					ret.append("\n").append(result.BSSID).append("=").append(result.level);
-				} else {
-					ret.append("\n").append(result.SSID).append("=").append(result.level);					
-				}
-			}
-						
-			return ret.substring(1);
-		}
-		
-		public List<ScanResult> getScanResults() {
-			return scanResults;
-		}
-
-		public JSONObject toJSONObject() throws JSONException {
-			JSONArray aps = new JSONArray();
-			
-			for(ScanResult result : scanResults) {
-				JSONObject ap = new JSONObject();
-
-				ap.put("ssid", result.SSID);
-				ap.put("bssid", result.BSSID);
-				ap.put("rssi", result.level);
-				ap.put("timestamp", result.timestamp);
-				ap.put("freq", result.frequency);
-				ap.put("capabilities", result.capabilities);
-				
-				aps.put(ap);
-			}
-
-			JSONObject ret = new JSONObject();
-			ret.put("access_points", aps);
-			
-			return ret;
-		}
+	
+	public WifiSurveyData getScanData() {
+		return cachedData;
 	}
 }

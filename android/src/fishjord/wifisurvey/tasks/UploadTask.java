@@ -14,9 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import fishjord.wifisurvey.R;
-import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
+import fishjord.wifisurvey.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
 
 public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
@@ -32,6 +33,8 @@ public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 		JSONArray trainingSamples = new JSONArray();
 
 		trainingData.put("time", new Date());
+		trainingData.put("model", Build.MODEL);
+		trainingData.put("android_version", Build.VERSION.RELEASE);
 		
 		for(WifiDataRecord record : params) {
 			JSONObject entry = new JSONObject();
@@ -46,6 +49,10 @@ public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 		trainingData.put("samples", trainingSamples);
 
 		return trainingData;
+	}
+	
+	public Void doUploadNow(WifiDataRecord... params) {
+		return doInBackground(params);
 	}
 
 	@Override

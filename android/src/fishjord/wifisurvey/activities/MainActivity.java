@@ -1,14 +1,13 @@
 package fishjord.wifisurvey.activities;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.method.ScrollingMovementMethod;
@@ -16,97 +15,70 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import fishjord.wifisurvey.R;
-import fishjord.wifisurvey.ScanLevel;
-import fishjord.wifisurvey.WifiDataManager;
-import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
-import fishjord.wifisurvey.datacollectors.ConnectedAPCollector;
-import fishjord.wifisurvey.datacollectors.LatencyDataCollector;
-import fishjord.wifisurvey.datacollectors.WifiScanCollector;
-import fishjord.wifisurvey.datacollectors.WifiScanCollector.ScanManager;
+import fishjord.wifisurvey.ScanManager;
+import fishjord.wifisurvey.ScanManager.ScanResultUpdate;
+import fishjord.wifisurvey.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
-import fishjord.wifisurvey.tasks.UploadTask;
 
 public class MainActivity extends Activity implements
-		OnSharedPreferenceChangeListener {
-
-	private WifiDataManager dataManager;
-	private WifiDataRecord lastRecord;
-	
-	public static final ScanManager scanLock = new ScanManager();
+		OnSharedPreferenceChangeListener, ScanResultUpdate {
+	private ScanManager scanManager;
+	private WifiManager wifiManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		WifiManager wifiManager = (WifiManager) this.getApplicationContext()
+
+		wifiManager = (WifiManager) this.getApplicationContext()
 				.getSystemService(Context.WIFI_SERVICE);
-		this.registerReceiver(scanLock, new IntentFilter(
-				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		PreferenceManager.setDefaultValues(this.getApplicationContext(), R.xml.wifi_survey_preferences, false);
+		PreferenceManager.setDefaultValues(this.getApplicationContext(),
+				R.xml.wifi_survey_preferences, true);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		
+		scanManager = new ScanManager(wifiManager, prefs.getString("base_url",
+				"") + "/upload.php", Integer.valueOf(prefs.getString("ping_count", "-1")),
+				prefs.getString("ping_host", ""),
+				Long.valueOf(prefs.getString("delay", "600000")));
+		scanManager.setScanResultUpdateListener(this);
 		prefs.registerOnSharedPreferenceChangeListener(this);
 		
-		dataManager = new WifiDataManager(
-				new WifiScanCollector(wifiManager, scanLock),
-				new ConnectedAPCollector(wifiManager),
-				//new PingDataCollector(wifiManager, 100)
-				new LatencyDataCollector(wifiManager, (short)100)
-				);
+		this.registerReceiver(scanManager, new IntentFilter(
+				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+
+		wifiManager.startScan();
 	}
 
-	public void refreshReadings(View view) {
-		Log.d(this.getClass().getCanonicalName(), "Starting readings refresh");
-		final WifiDataManager finalDataManager = dataManager;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+	public void onNewScan(final WifiDataRecord result) {
+		this.runOnUiThread(new Runnable() {
 
-		final int scanLevel = Integer.parseInt(prefs.getString("mode", ScanLevel.OFF + ""));
-		final long cacheTime = Integer.parseInt(prefs.getString("delay", "1000"));
-		final ProgressDialog dialog = ProgressDialog.show(this, "", "Refreshing...", true, false);
-		
-		AsyncTask<Void, Void, WifiDataRecord> task = new AsyncTask<Void, Void, WifiDataRecord>() {
-
-			@Override
-			protected WifiDataRecord doInBackground(Void... arg0) {
-				return finalDataManager.refreshData(ScanLevel.ACTIVE, 0);
-			}
-
-			protected void onPostExecute(WifiDataRecord result) {
-				dialog.dismiss();
+			public void run() {
 				TextView textView = (TextView) findViewById(R.id.textView1);
 				textView.setMovementMethod(new ScrollingMovementMethod());
 				StringBuilder builder = new StringBuilder();
 				builder.append("Current scan data\n----------------------\n\n");
-				builder.append("Scan Level: ").append(scanLevel).append("\n");
-				builder.append("Max cache time: " + cacheTime / 1000).append("\n");
-				builder.append("Scan time: " + result.getScanTime()).append("\n\n");
-				
-				for(WifiSurveyData data : result.getScanResults()) {
-					builder.append(data.getDataLabel() + ": " + data.toString()).append("\n\n");
-				}
-				
-				textView.setText(builder.toString());
-				MainActivity.this.lastRecord = result;
-			}
-		};
+				builder.append("Scan time: " + result.getScanTime()).append(
+						"\n\n");
 
-		task.execute();
+				for (WifiSurveyData data : result.getScanResults()) {
+					builder.append(data.getDataLabel() + ": " + data.toString())
+							.append("\n\n");
+				}
+
+				textView.setText(builder.toString());
+			}
+		});
+
+	}
+
+	public void refreshReadings(View view) {
+		uploadData(view);
 	}
 
 	public void uploadData(View view) {
-		if(lastRecord == null) {
-			return;
-		}
-		Log.d(this.getClass().getCanonicalName(), "Starting upload");
-		final WifiDataManager finalDataManager = dataManager;
-		final SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		
-		UploadTask task = new UploadTask(prefs.getString(
-							"base_url", "") + "/upload.php");
-		
-		task.execute(lastRecord);
+		wifiManager.startScan();
 	}
 
 	public void showPreferences(View view) {
@@ -124,7 +96,16 @@ public class MainActivity extends Activity implements
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		Log.i(this.getClass().getCanonicalName(), key + " changed");
-
+		if (key.equals("base_url")) {
+			scanManager.setPostUrl(prefs.getString("base_url", "")
+					+ "/upload.php");
+		} else if (key.equals("ping_count")) {
+			scanManager.setPingCount(Integer.valueOf(prefs.getString("ping_count", "-1")));
+		} else if (key.equals("ping_host")) {
+			scanManager.setPingHost(prefs.getString("ping_host", ""));
+		} else if (key.equals("delay")) {
+			scanManager.setTaskDelay(Long.valueOf(prefs.getString("delay", "")));
+		}
 	}
 
 }

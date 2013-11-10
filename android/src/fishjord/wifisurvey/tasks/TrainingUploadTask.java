@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
+import fishjord.wifisurvey.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
 
 public class TrainingUploadTask extends AsyncTask<WifiDataRecord, Void, Boolean> {

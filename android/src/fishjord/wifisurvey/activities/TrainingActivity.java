@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -21,16 +21,15 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import fishjord.wifisurvey.R;
-import fishjord.wifisurvey.ScanLevel;
-import fishjord.wifisurvey.WifiDataManager;
-import fishjord.wifisurvey.WifiDataManager.WifiDataRecord;
+import fishjord.wifisurvey.WifiDataRecord;
 import fishjord.wifisurvey.datacollectors.WifiScanCollector;
+import fishjord.wifisurvey.datacollectors.WifiScanCollector.ScanLock;
 import fishjord.wifisurvey.datacollectors.WifiSurveyData;
 import fishjord.wifisurvey.tasks.TrainingUploadTask;
 
 public class TrainingActivity extends Activity {
 
-	private WifiDataManager dataManager;
+	private WifiScanCollector dataManager;
 	private final UUID trainingId = UUID.randomUUID();
 
 	@Override
@@ -38,11 +37,14 @@ public class TrainingActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_training);
 
+		ScanLock scanLock = new ScanLock();
 		WifiManager wifiManager = (WifiManager) this.getApplicationContext()
 				.getSystemService(Context.WIFI_SERVICE);
+		this.registerReceiver(scanLock, new IntentFilter(
+				WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		
 
-		dataManager = new WifiDataManager(new WifiScanCollector(wifiManager,
-				MainActivity.scanLock));
+		dataManager = new WifiScanCollector(wifiManager, scanLock);
 		PreferenceManager.setDefaultValues(this.getApplicationContext(),
 				R.xml.wifi_survey_preferences, false);
 
@@ -64,7 +66,7 @@ public class TrainingActivity extends Activity {
 	}
 
 	public void collectTrainingSample(View view) {
-		final WifiDataManager finalDataManager = dataManager;
+		final WifiScanCollector finalDataManager = dataManager;
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(view.getContext());
 		final int NUM_TRAINING = Integer.valueOf(prefs.getString(
@@ -80,24 +82,27 @@ public class TrainingActivity extends Activity {
 		Log.d(this.getClass().getCanonicalName(),
 				"Starting taking training readings for location " + location
 						+ " and sending to " + prefs.getString("base_url", ""));
-		final TrainingUploadTask uploadTask = new TrainingUploadTask(prefs.getString("base_url", "")
-						+ "/upload_training.php", location, trainingId);
+		final TrainingUploadTask uploadTask = new TrainingUploadTask(
+				prefs.getString("base_url", "") + "/upload_training.php",
+				location, trainingId);
 
-		AsyncTask<Void, Void, List<WifiDataRecord>> task = new AsyncTask<Void, Void, List<WifiDataRecord>>() {
-			
+		AsyncTask<Void, Void, List<WifiSurveyData>> task = new AsyncTask<Void, Void, List<WifiSurveyData>>() {
+
 			private boolean sendOk;
 
 			@Override
-			protected List<WifiDataRecord> doInBackground(Void... arg0) {
-				List<WifiDataRecord> ret = new ArrayList<WifiDataRecord>();
+			protected List<WifiSurveyData> doInBackground(Void... arg0) {
+				List<WifiSurveyData> ret = new ArrayList<WifiSurveyData>();
 				for (int index = 0; index < NUM_TRAINING; index++) {
 					Log.d(this.getClass().getCanonicalName(),
 							"Training sample " + index);
 					progress.setProgress(index + 1);
 					// dialog.setMessage("Training sample " + (index + 1));
-					ret.add(dataManager.refreshData(ScanLevel.TRAINING, 0));
+					dataManager.doRefreshData();
+					ret.add(dataManager.getScanData());
 				}
-				sendOk = uploadTask.go(ret.toArray(new WifiDataRecord[ret.size()]));
+				sendOk = uploadTask.go(ret.toArray(new WifiDataRecord[ret
+						.size()]));
 				return ret;
 			}
 
@@ -118,7 +123,8 @@ public class TrainingActivity extends Activity {
 					}
 				}
 
-				textView.setText(uploadTask.getErrorMessage() + "\n\n" + builder.toString());
+				textView.setText(uploadTask.getErrorMessage() + "\n\n"
+						+ builder.toString());
 				if (sendOk) {
 					locNumber.setText((location + 1) + "");
 				}
