@@ -98,12 +98,14 @@ public class ScanManager extends BroadcastReceiver {
 	}
 
 	private WifiDataRecord scan() {
+		int scanLevel = ScanLevel.PASSIVE;
 		List<WifiSurveyData> ret = new ArrayList();
 		ret.add(new ScanSurveyData(wifiManager.getScanResults()));
 
 		if (wifiManager.isWifiEnabled()
 				&& wifiManager.getConnectionInfo() != null) {
 			ret.add(new APData(wifiManager.getConnectionInfo()));
+			scanLevel++;
 
 			DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
 			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -114,6 +116,7 @@ public class ScanManager extends BroadcastReceiver {
 							.runConnectionTest(pingHost, pingCount);
 					ret.add(new LatencyData(wifiInfo.getSSID(), pingCount,
 							result));
+					scanLevel++;
 				} catch (Exception e) {
 					Log.d(this.getClass().getCanonicalName(),
 							"Error when running latency test " + e);
@@ -122,7 +125,7 @@ public class ScanManager extends BroadcastReceiver {
 			}
 		}
 
-		return new WifiDataRecord(ret, ScanLevel.ACTIVE);
+		return new WifiDataRecord(ret, scanLevel);
 	}
 
 	private void update(WifiDataRecord data) {

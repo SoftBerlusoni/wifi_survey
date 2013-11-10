@@ -79,11 +79,9 @@ public class ConnectionTestClient extends WifiServerClient {
 
 		out.writeInt(numPackets);
 		int udpPort = in.readInt();
-		System.out.println("Sending to port " + udpPort);
 
 		DatagramGenerator sender = new DatagramGenerator(serverAddress, udpPort);
 		for (short index = 0; index < numPackets; index++) {
-			System.out.println("Sending packet " + index);
 			sender.send(index);
 			try {
 				Thread.sleep(10);
@@ -99,7 +97,6 @@ public class ConnectionTestClient extends WifiServerClient {
 		for (short index = 0; index < numPackets; index++) {
 			packetNum = in.readShort();
 			processingTime = in.readLong();
-			System.out.println(packetNum);
 			
 			if(processingTime == -1) { //packet was lost
 				continue;
