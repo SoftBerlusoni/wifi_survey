@@ -59,7 +59,6 @@ public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 	protected Void doInBackground(WifiDataRecord... params) {
 		try {
 			JSONObject toSend = toJSON(params);
-			Log.d(this.getClass().getCanonicalName(), "sending " + toSend);
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpPut putReq = new HttpPut(url);
