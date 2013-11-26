@@ -59,7 +59,7 @@ public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 	protected Void doInBackground(WifiDataRecord... params) {
 		try {
 			JSONObject toSend = toJSON(params);
-			Log.d(this.getClass().getCanonicalName(), "sending " + toSend);
+			//Log.d(this.getClass().getCanonicalName(), "sending " + toSend);
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpPut putReq = new HttpPut(url);
@@ -69,12 +69,9 @@ public class UploadTask extends AsyncTask<WifiDataRecord, Void, Void> {
 					HTTP.CONTENT_TYPE, "text/plain;charset=UTF-8"));
 			putReq.setEntity(entity);
 
-			Log.d(this.getClass().getCanonicalName(), "Sending request");
 			HttpResponse response = httpClient.execute(putReq);
 			Log.d(this.getClass().getCanonicalName(), "Status line: "
 					+ response.getStatusLine());
-			Log.d(this.getClass().getCanonicalName(),
-					EntityUtils.toString(response.getEntity()));
 			
 		} catch(Exception e) {
 			Log.d(this.getClass().getCanonicalName(), "sending failed " + e.toString());			
