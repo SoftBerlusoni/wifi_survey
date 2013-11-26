@@ -48,7 +48,7 @@ public class ScanSurveyData extends WifiSurveyData {
 			ap.put("ssid", result.SSID);
 			ap.put("bssid", result.BSSID);
 			ap.put("rssi", result.level);
-			ap.put("timestamp", result.timestamp);
+			//ap.put("timestamp", result.timestamp);
 			ap.put("freq", result.frequency);
 			ap.put("capabilities", result.capabilities);
 			
