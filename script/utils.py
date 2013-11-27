@@ -4,6 +4,8 @@ import argparse
 import json
 import sys
 import numpy as np
+import datetime
+import time
 
 def read_training_data(fname):
     data = []
@@ -33,23 +35,26 @@ def read_data(fname):
     data = []
 
     lineno = 0
+    time_format = "%a %b %d %H:%M:%S %Z %Y"
     for line in open(fname):
         lineno += 1
         try:
             this_line = json.loads(line)
+            this_line["time"] = datetime.datetime(*time.strptime(this_line["time"], time_format)[:6])
 
             for sample in this_line["samples"]:
                 if "scan" not in sample or len(sample["scan"]) == 0:
                     continue
 
                 pattern = dict(this_line)
-                pattern["scan"] = sample["scan"]["access_points"]
-
+                pattern.update(sample)
+                pattern.update(sample["scan"])
+                pattern["scan"] = pattern["access_points"]
                 del pattern["samples"]
-                    
+
                 data.append(pattern)
         except ValueError:
-            print >>sys.stderr, "Barfing on line {0}: {1}".format(lineno, line.strip())
+            print >>sys.stderr, "Bad line number {0}".format(lineno)
     return data
 
 # {"time":"Sun Oct 27 13:00:58 EDT 2013","type":"training_sample","location":1,"samples":[
@@ -65,6 +70,7 @@ def parse_training_data(data):
     for sample in data:
         assert(sample["type"] == "training_sample")
         scans = sample["samples"]
+        
         for scan in sample["samples"]:
             assert(scan["scan_level"] == 3)
 
@@ -74,7 +80,7 @@ def parse_training_data(data):
 
             training_sample = {}
             training_sample["location"] = sample["location"]
-            
+
             for ap in scan["scan"]["access_points"]:
                 training_sample[ap["bssid"]] = ap["rssi"]
                 bssids.append(ap["bssid"])
